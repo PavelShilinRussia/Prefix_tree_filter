@@ -17,6 +17,7 @@ public:
     std::pair<std::vector<uint8_t>, std::vector<uint8_t>>  get_dst_ip_range();
     std::pair<uint16_t, uint16_t>  get_dst_port_range();
     uint32_t get_precedence();
+    range get_range_i(int i);
 
     template <typename T>
     T get_filter_param_by_name(const std::string& name);

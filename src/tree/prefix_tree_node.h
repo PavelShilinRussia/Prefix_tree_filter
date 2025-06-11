@@ -6,9 +6,13 @@
 #include <vector> 
 #include "range.h"
 
+
+
+
+
 struct node {
     bool is_terminal;
-    std::vector<std::pair<range, node*>> desc;
+    std::vector<std::pair<int, node*>> ranges;
     std::vector<filter*> filters;
 
     node();
