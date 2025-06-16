@@ -19,75 +19,71 @@ void sorted_insert(std::vector<std::pair<int, node*>>& ranges, const std::pair<i
 }
 
 
-void insert(node *root, filter *filter)
-{
-    node* current = root;
-    auto to_insert = filter_to_vector_of_ranges(filter);
-    bool match = false;
-    for (int i = 0; i < to_insert.size(); i++){
-        for (auto condition: current->desc){
-            // не пересекаются
-            if (condition.first.max_value < to_insert[i].min_value || to_insert[i].max_value < condition.first.min_value){
-                node* new_node = new node;
-                if (i == to_insert.size() - 1){
-                    new_node->is_terminal = true;
-                }
-                current->desc.push_back(std::make_pair(to_insert[i], new_node));
-                current = new_node;
-                continue;
-            }
-            //пересекаются
-            int min_all = std::min(condition.first.min_value, to_insert[i].min_value);
-            int max_all = std::max(condition.first.max_value, to_insert[i].max_value);
-
-            int intersection_min = std::max(condition.first.min_value, to_insert[i].min_value);
-            int intersection_max = std::min(condition.first.max_value, to_insert[i].max_value);
-
-            if (min_all < intersection_min && intersection_max < max_all) {
-                range(min_all, intersection_min);
-            }
-            else if (min_all < intersection_min && intersection_max == max_all){
-
-            }
-            else if (max_all > intersection_max && intersection_min == min_all){
-                
-            }
-            range(intersection_min, intersection_max);
-
-            if (intersection_max < max_all) {
-                range(intersection_max, max_all);
-            }
-
-            
-        }
+node* deep_copy_node(const node* source) {
+    if (!source) {
+        return nullptr;
     }
 
+    node* new_node = new node();
+    new_node->is_terminal = source->is_terminal;
 
+    new_node->ranges.reserve(source->ranges.size());
+    for (const auto& range_pair : source->ranges) {
+        node* copied_child = deep_copy_node(range_pair.second);
+        new_node->ranges.emplace_back(range_pair.first, copied_child);
+    }
+
+    new_node->filters.reserve(source->filters.size());
+    for (const filter* f : source->filters) {
+        new_node->filters.push_back(new filter(*f));
+    }
+
+    return new_node;
 }
+
 
 void insert_flt(node *current_node, filter *filter, int num_of_range_in_filter=0)
 {
     range flt_part = filter->get_range_i(num_of_range_in_filter);
-    for (int i = 0; i <  current_node->ranges.size(); i++) {
+    node* no_intersections_node  = new node();
+
+    int i = 0;
+    while (i <  current_node->ranges.size()) {
+
         current_node->filters.push_back(filter);
-        if (current_node->ranges[i].first == flt_part.min_value){
-            if (current_node->ranges[i+1].first > flt_part.max_value){
+
+        
+        if ( current_node->ranges[i].first == flt_part.min_value ){
+            if ( current_node->ranges[i+1].first > flt_part.max_value ){
                 sorted_insert(current_node->ranges, std::make_pair(flt_part.max_value, current_node->ranges[i].second));
-                //сделать deep copy в current_node->ranges[i].second (в начало пересечения)
+                node* deep_copied_node = deep_copy_node(current_node->ranges[i].second);
+                current_node->ranges[i].second = deep_copied_node;
+
 
                 insert_flt(current_node->ranges[i].second, filter, num_of_range_in_filter + 1);
+                break;
             }
-            else if(current_node->ranges[i+1].first < flt_part.max_value){
-                node* new_node = new node();
-                current_node->ranges[i+1].second = new_node;
-                sorted_insert(current_node->ranges, std::make_pair(flt_part.max_value, nullptr));
+            else if( current_node->ranges[i+1].first < flt_part.max_value ){
 
+                current_node->ranges[i+1].second = no_intersections_node;
+                if( no_intersections_node->filters.size() == 0 ){
+                        insert_flt(no_intersections_node, filter, num_of_range_in_filter + 1);
+                    }
                 insert_flt(current_node->ranges[i].second, filter, num_of_range_in_filter + 1);
-                insert_flt(current_node->ranges[i + 1].second, filter, num_of_range_in_filter + 1);
+
+                if( i == current_node->ranges.size() - 2 || current_node->ranges[i+2].first > flt_part.max_value ){
+                    sorted_insert(current_node->ranges, std::make_pair(flt_part.max_value, nullptr));
+                    break;
+                }
+                else if ( current_node->ranges[i+2].first < flt_part.max_value ){
+                    flt_part.min_value == current_node -> ranges[i+2].first;
+                }
+                
             }
-            else if(current_node->ranges[i+1].first == flt_part.max_value){
+            else if( current_node->ranges[i+1].first == flt_part.max_value ){
                 
                 insert_flt(current_node->ranges[i].second, filter, num_of_range_in_filter + 1);
+                break;
             }
         }
         else if(current_node->ranges[i].first < flt_part.min_value){
@@ -95,8 +91,45 @@ void insert_flt(node *current_node, filter *filter, int num_of_range_in_filter=0
         }
         else if(current_node->ranges[i].first > flt_part.min_value){
 
-        }
+          
+            sorted_insert(current_node->ranges, std::make_pair(flt_part.min_value, no_intersections_node));
+        
+            if(current_node->ranges[i+1].first < flt_part.max_value){
+                insert_flt(current_node->ranges[i].second, filter, num_of_range_in_filter + 1);
+                current_node->ranges[i + 1].second = no_intersections_node;
+                if( no_intersections_node->filters.size() == 0 ){
+                        insert_flt(no_intersections_node, filter, num_of_range_in_filter + 1);
+                    }
 
+                if( i == current_node->ranges.size() - 2 || current_node->ranges[i+2].first > flt_part.max_value ){
+                    sorted_insert(current_node->ranges, std::make_pair(flt_part.max_value, nullptr));
+                    
+                    break;
+                }
+                else if( current_node->ranges[i+2].first < flt_part.max_value ){
+                    flt_part.min_value == current_node -> ranges[i+2].first;
+                }
+                
+            }
+            else if( current_node->ranges[i+1].first > flt_part.max_value ){
+                sorted_insert(current_node->ranges, std::make_pair(flt_part.max_value, current_node->ranges[i].second));
+
+                node* deep_copied_node = deep_copy_node(current_node->ranges[i].second);
+                current_node->ranges[i].second = deep_copied_node;
+                
+                insert_flt(current_node->ranges[i].second, filter, num_of_range_in_filter + 1);
+                if( no_intersections_node->filters.size() == 0 ){
+                        insert_flt(no_intersections_node, filter, num_of_range_in_filter + 1);
+                    }
+                    break;
+                }
+            else if ( current_node->ranges[i+1].first == flt_part.max_value  ){
+                insert_flt(current_node->ranges[i].second, filter, num_of_range_in_filter + 1);
+                break;
+            }
+
+        }
+        i ++;
     }
 }
 

@@ -6,6 +6,7 @@
 class filter {
 public:
     filter( std::string );
+    filter(const filter&);
 
 
     

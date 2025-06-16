@@ -25,11 +25,22 @@ filter::filter(std::string fltr)
      dst_port_range_ = get_port_range( tokens.at( 4 ) );
      precedence_ = std::stoi( tokens.at( 5 ) );
     
-
-
-
-
 }
+
+filter::filter(const filter& other)
+    : fltr_(other.fltr_),
+      id_(other.id_),
+      protocol_(other.protocol_),
+      src_ip_ranage_(other.src_ip_ranage_),
+      src_port_range_(other.src_port_range_),
+      dst_ip_ranage_(other.dst_ip_ranage_),
+      dst_port_range_(other.dst_port_range_),
+      precedence_(other.precedence_)
+{
+}
+
+
+
 
 std::string filter::get_filter_as_string()
 {
