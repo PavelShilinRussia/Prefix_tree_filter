@@ -1,3 +1,4 @@
+#pragma once
 #include <cstdint>
 #include "prefix_tree_node.h"
 #include "filter/filter.h"

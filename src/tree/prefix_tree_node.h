@@ -1,3 +1,6 @@
+#pragma once 
+
+
 #include <vector>
 #include <iostream>
 #include <cstdint>
@@ -5,6 +8,7 @@
 #include <map>
 #include <vector> 
 #include "range.h"
+#include "../filter/filter.h"
 
 
 

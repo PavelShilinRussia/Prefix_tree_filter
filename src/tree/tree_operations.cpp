@@ -96,7 +96,7 @@ void insert_flt(node *current_node, filter *filter, int num_of_range_in_filter =
                 }
                 else
                 {
-                    flt_part.min_value == current_node->ranges[i + 2].first;
+                    flt_part.min_value = current_node->ranges[i + 2].first;
                     insert_flt(current_node->ranges[i].second, filter, num_of_range_in_filter + 1);
                 }
             }
@@ -138,7 +138,7 @@ void insert_flt(node *current_node, filter *filter, int num_of_range_in_filter =
                 break;
             }
             else {
-                flt_part.min_value == current_node->ranges[i].first;
+                flt_part.min_value = current_node->ranges[i].first;
             }
 
 

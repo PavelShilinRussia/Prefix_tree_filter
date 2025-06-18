@@ -1,5 +1,4 @@
 #include <iostream>
-#include "filter/filter.h"
 #include "utils/utils.h"
 
 int main(){
@@ -8,7 +7,9 @@ int main(){
 
     std::pair<std::vector<uint8_t>, std::vector<uint8_t>>  a = get_ip_range(filter);
     
-    std::cout << "кк";
+    for (auto i : a.first) {
+        std::cout << (int)i << " ";
+    } 
     return 0;
 }
 

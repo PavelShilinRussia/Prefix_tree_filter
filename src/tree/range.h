@@ -1,3 +1,5 @@
+#pragma once
+
 struct range
 {
     int max_value;

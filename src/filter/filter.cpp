@@ -1,5 +1,5 @@
 #include "filter.h"
-#include "utils/utils.h"
+#include "utils.h"
 
 filter::filter(std::string fltr)
     : fltr_( fltr )
@@ -80,4 +80,23 @@ std::pair<uint16_t, uint16_t> filter::get_dst_port_range()
 uint32_t filter::get_precedence()
 {
     return 0;
+}
+
+range filter::get_range_i(int i)
+{
+
+    switch (i)
+    {
+    case 1:
+        break;
+    case 2:
+        break;
+    case 3:
+        break;
+    case 4:
+    
+    default:
+        break;
+    }
+    return range();
 }

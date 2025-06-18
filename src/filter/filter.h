@@ -1,11 +1,15 @@
+#pragma once
+
+
 #include <cstdint>
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include "../tree/range.h"
 
 class filter {
 public:
-    filter( std::string );
+    filter( std::string );  
     filter(const filter&);
 
 
@@ -20,8 +24,6 @@ public:
     uint32_t get_precedence();
     range get_range_i(int i);
 
-    template <typename T>
-    T get_filter_param_by_name(const std::string& name);
 
     
 
@@ -41,33 +43,3 @@ private:
     uint32_t precedence_;
 };
 
-template <typename T>
-inline T filter::get_filter_param_by_name(const std::string &name)
-{
-    switch (name)
-        {
-        case "id":
-            return id_;
-            break;
-        case "protocol":
-            return protocol_;
-            break;
-        case "src_ip_range":
-            return src_ip_ranage_;
-            break;
-        case "src_port_range":
-            return src_port_range_;
-            break;
-        case "dst_ip_range":
-            return dst_ip_ranage_;
-            break;
-        case "dst_port_range":
-            return dst_port_range_;
-            break;
-        case "precedence":
-            return precedence_;
-            break;
-        default:
-            break;
-        }
-}
