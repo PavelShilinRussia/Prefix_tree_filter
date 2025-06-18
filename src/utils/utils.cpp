@@ -6,35 +6,41 @@
 #include <arpa/inet.h>
 
 
+#include <arpa/inet.h>
+#include <stdexcept>
+#include <sstream>
+#include <vector>
+#include <string>
+
 std::pair<std::vector<uint8_t>, std::vector<uint8_t>> get_ip_range(const std::string& ip_mask) {
     std::stringstream ss(ip_mask);
     std::string ip_str, mask_str;
 
     std::getline(ss, ip_str, '/');
     std::getline(ss, mask_str);
+       
 
-    int mask = std::stoi(mask_str);
+    int mask;
+    mask = std::stoi(mask_str);
+    
 
-    uint32_t ip = ntohl(inet_addr(ip_str.c_str()));
+    in_addr_t ip = inet_addr(ip_str.c_str());
+    ip = ntohl(ip); 
 
     uint32_t mask_bits = mask == 0 ? 0 : (~0U << (32 - mask));
-
-    uint32_t ip_min = ip & mask_bits;
-
-    uint32_t ip_max = ip_min | ~mask_bits;
+    uint32_t ip_min = ip & mask_bits; 
+    uint32_t ip_max = ip_min | ~mask_bits; 
 
     auto to_bytes = [](uint32_t addr) -> std::vector<uint8_t> {
-        return std::vector<uint8_t>{
+        return {
             static_cast<uint8_t>((addr >> 24) & 0xFF),
             static_cast<uint8_t>((addr >> 16) & 0xFF),
-            static_cast<uint8_t>((addr >> 8) & 0xFF),
+            static_cast<uint8_t>(addr >> 8 & 0xFF),
             static_cast<uint8_t>(addr & 0xFF)
         };
     };
-
-    return std::make_pair(to_bytes(ip_min), to_bytes(ip_max) );
+    return std::make_pair(to_bytes(ip_min), to_bytes(ip_max));
 }
-
 
 std::pair<uint16_t, uint16_t> get_port_range( std::string port_range )
 {
@@ -74,5 +80,14 @@ std::vector<range> filter_to_vector_of_ranges(filter *fltr)
 
     auto dst_port_range = fltr->get_src_port_range();
     res.push_back(range(dst_port_range.first, dst_port_range.second));
-    
+    return res;
+}
+
+
+
+std::string trim(const std::string& str) {
+    std::string result = str;
+    result.erase(0, result.find_first_not_of(" \t"));
+    result.erase(result.find_last_not_of(" \t") + 1);
+    return result;
 }

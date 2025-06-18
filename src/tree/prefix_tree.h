@@ -3,11 +3,9 @@
 #include "prefix_tree_node.h"
 #include "filter/filter.h"
 
-class prefix_tree{
+struct prefix_tree{
 public:
     prefix_tree();
-    void insert(filter* filter);
-    int find_filter(const int& value);
-private:
+    //int find_filter(const int& value);
     node* root; 
 };

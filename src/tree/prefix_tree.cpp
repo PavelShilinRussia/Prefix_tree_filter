@@ -5,4 +5,8 @@
 #include <cstdint>
 #include <vector>
 
+prefix_tree::prefix_tree()
+{
+    root = new node();
+}
 

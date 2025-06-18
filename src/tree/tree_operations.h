@@ -3,4 +3,4 @@
 #include "utils/utils.h"
 
 
-void insert(node* node, filter* filter);
+void insert_flt(node *current_node, filter *filter, int num_of_range_in_filter = 0);
