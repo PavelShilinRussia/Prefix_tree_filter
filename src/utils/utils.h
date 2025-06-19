@@ -7,7 +7,6 @@
 #include "filter/filter.h"
 
 
-std::pair<std::vector<uint8_t>, std::vector<uint8_t>> get_ip_range(const std::string& ip_mask);
-std::pair<uint16_t, uint16_t> get_port_range( std::string );
-std::vector<range> filter_to_vector_of_ranges(filter* fltr);
-std::string trim(const std::string& str);
+std::pair<uint32_t, uint32_t> get_ip_range(const std::string&);
+std::pair<uint16_t, uint16_t> get_port_range(const std::string& );
+std::string trim(const std::string& );

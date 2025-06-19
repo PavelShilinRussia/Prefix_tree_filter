@@ -2,10 +2,10 @@
 #include <cstdint>
 #include "prefix_tree_node.h"
 #include "filter/filter.h"
-
+#include "filter/data.h"
 struct prefix_tree{
 public:
     prefix_tree();
-    //int find_filter(const int& value);
+    filter* match(data& data);
     node* root; 
 };

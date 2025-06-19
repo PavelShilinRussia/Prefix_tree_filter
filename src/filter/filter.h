@@ -1,45 +1,40 @@
 #pragma once
 
-
 #include <cstdint>
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include "../tree/range.h"
+#include "range.h"
 
-class filter {
-public:
-    filter( std::string );  
-    filter(const filter&);
-
-
+struct filter {
+    std::pair<uint32_t, uint32_t> get_range_i(int i);
     
-    std::string get_filter_as_string();
-    uint32_t get_id();
-    uint8_t get_protocol();
-    std::pair<std::vector<uint8_t>, std::vector<uint8_t>>  get_src_ip_range();
-    std::pair<uint16_t, uint16_t> get_src_port_range();
-    std::pair<std::vector<uint8_t>, std::vector<uint8_t>>  get_dst_ip_range();
-    std::pair<uint16_t, uint16_t>  get_dst_port_range();
-    uint32_t get_precedence();
-    range get_range_i(int i);
+    std::string fltr_ = "";
 
-
+    uint32_t id_ = UINT32_MAX;
+    uint32_t precedence_ = UINT32_MAX;
     
+    union {
+        struct {
+            uint32_t protocol_start;
+            uint32_t protocol_end;
+            uint32_t src_ip_start;
+            uint32_t src_ip_end;
+            uint32_t src_port_start;
+            uint32_t src_port_end;
+            uint32_t dst_ip_start;
+            uint32_t dst_ip_end;
+            uint32_t dst_port_start;;
+            uint32_t dst_port_end;    
+        };
+        uint32_t raw[10] = {0};
+    };    
 
-private:
-    std::string fltr_;
 
-    uint32_t id_;
-
-    uint8_t protocol_;
-
-    std::pair<std::vector<uint8_t>, std::vector<uint8_t>> src_ip_ranage_;
-    std::pair<uint16_t, uint16_t> src_port_range_;
-
-    std::pair<std::vector<uint8_t>, std::vector<uint8_t>> dst_ip_ranage_;
-    std::pair<uint16_t, uint16_t> dst_port_range_;
-
-    uint32_t precedence_;
+    operator bool()
+    {
+        return not fltr_.empty();
+    }
 };
 
+filter prepare_filter(std::string string_repr);
