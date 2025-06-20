@@ -23,7 +23,7 @@ int main() {
     insert_flt(tree.root, &f3);
 
 
-    data dt = data(6, 100,63,255,213, 30000, 41,41,255,251, 19000);
+    data dt = data(6, ntohl(inet_addr("100.63.255.213")), 30000, ntohl(inet_addr("41.41.255.251")), 19000);
 
     filter* flt = tree.match(dt);
     if (flt != nullptr){
@@ -33,6 +33,9 @@ int main() {
         std::cout << "no filter";
     }
     
+    
+
+
     return 0;
 }
 

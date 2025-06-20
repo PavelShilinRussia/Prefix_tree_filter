@@ -119,17 +119,17 @@ void insert_flt(node *current_node, filter *filter, int num_of_range_in_filter)
         }
         else if ( lb > current_node->ranges[i].first ) {
             if (i+1 == current_node->ranges.size()) {
-                if (lb > current_node->ranges[i-1].first){
+                if (lb > current_node->ranges[i].first){
                     sorted_insert(current_node->ranges, std::make_pair(lb, no_intersections_node));
-                } else if (lb == current_node->ranges[i-1].first) {
+                } else if (lb == current_node->ranges[i].first) {
                     current_node->ranges[i-1].second = no_intersections_node;
                 }
-
+                sorted_insert(current_node->ranges, std::make_pair(ub + 1, nullptr));
                 if (no_intersections_node->filters.size() == 0) {
                     insert_flt(no_intersections_node, filter, num_of_range_in_filter + 1);
                 }
 
-                sorted_insert(current_node->ranges, std::make_pair(ub + 1, nullptr));
+                
                 i ++;
                 return;
             }
