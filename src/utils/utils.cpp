@@ -4,13 +4,10 @@
 #include <string>
 #include <sstream>
 #include <arpa/inet.h>
-
-
-#include <arpa/inet.h>
+#include <utility>
+#include <algorithm>
 #include <stdexcept>
-#include <sstream>
-#include <vector>
-#include <string>
+#include "prefix_tree_node.h"
 
 std::pair<uint32_t, uint32_t> get_ip_range(const std::string& ip_mask) {
     std::stringstream ss(ip_mask);
@@ -20,7 +17,13 @@ std::pair<uint32_t, uint32_t> get_ip_range(const std::string& ip_mask) {
     std::getline(ss, mask_str);
        
     int mask;
-    mask = std::stoi(mask_str);
+    if (mask_str == ""){
+        mask = 32;
+    }
+    else{
+        mask = std::stoi(mask_str);
+    }
+    
     
 
     in_addr_t ip = inet_addr(ip_str.c_str());
@@ -41,6 +44,10 @@ std::pair<uint16_t, uint16_t> get_port_range(const std::string& port_range )
     while ( std::getline( ss, token, '-' ) ) {
         v_addr_range.push_back( token );
     }
+    
+    if (v_addr_range.size() == 1){
+        return {std::stoi( v_addr_range.at( 0 ) ), std::stoi( v_addr_range.at( 0 ) )};
+    }
 
     return {std::stoi( v_addr_range.at( 0 ) ), std::stoi( v_addr_range.at( 1 ) )};
 }
@@ -54,3 +61,32 @@ std::string trim(const std::string& str) {
     result.erase(result.find_last_not_of(" \t") + 1);
     return result;
 }
+
+
+void sorted_insert(std::vector<std::pair<uint64_t, node *>> &ranges, const std::pair<uint64_t, node *> &new_pair)
+{
+    auto it = std::lower_bound(ranges.begin(), ranges.end(), new_pair,
+                               [](const std::pair<uint64_t, node *> &a, const std::pair<uint64_t, node *> &b)
+                               {
+                                   return a.first < b.first;
+                               });
+
+    ranges.insert(it, new_pair);
+}
+
+
+void sorted_insert_filter(std::vector<filter*>& vect, filter* flt)
+{
+    if (flt->fltr_ == ""){
+            std::cout <<"";
+    }
+    auto it = std::lower_bound(vect.begin(), vect.end(), flt,
+                               [](filter* a, filter* b)
+                               {
+                                   return a->precedence_ > b->precedence_;
+                               });
+
+    vect.insert(it, flt);
+}
+
+

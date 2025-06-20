@@ -4,10 +4,9 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include "range.h"
 
 struct filter {
-    std::pair<uint32_t, uint32_t> get_range_i(int i);
+    std::pair<uint64_t, uint64_t> get_range_i(int i);
     
     std::string fltr_ = "";
 

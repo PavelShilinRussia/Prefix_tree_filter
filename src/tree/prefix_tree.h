@@ -2,10 +2,12 @@
 #include <cstdint>
 #include "prefix_tree_node.h"
 #include "filter/filter.h"
-#include "filter/data.h"
+#include "filter/packet.h"
 struct prefix_tree{
-public:
-    prefix_tree();
-    filter* match(data& data);
     node* root; 
+    prefix_tree();
+    filter* match(packet& packet);
+    void insert(filter *filter);
+    void insert_recursive(node *current_node, filter *filter, int num_of_range_in_filter = 0);
+    
 };

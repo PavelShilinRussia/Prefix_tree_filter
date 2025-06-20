@@ -15,7 +15,6 @@ add_executable(Prefix_tree_filter
     src/tree/prefix_tree.cpp
     src/tree/tree_operations.cpp
     src/tree/prefix_tree_node.cpp
-    src/tree/range.cpp
 )
 
 target_include_directories(Prefix_tree_filter PUBLIC
