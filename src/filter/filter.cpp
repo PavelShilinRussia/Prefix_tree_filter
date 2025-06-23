@@ -1,9 +1,9 @@
 #include "filter.h"
 #include "utils/utils.h"
 
-filter prepare_filter(std::string string_repr)
+filter* prepare_filter(std::string string_repr)
 {
-    filter rv;
+    filter* rv = new filter;
 
     std::stringstream ss(string_repr);
     std::vector<std::string> tokens;
@@ -15,8 +15,8 @@ filter prepare_filter(std::string string_repr)
         }
     }
 
-    rv.id_ = std::stoi(tokens[0]);
-    rv.precedence_ = std::stoi(tokens[1]);
+    rv->id_ = std::stoi(tokens[0]);
+    rv->precedence_ = std::stoi(tokens[1]);
 
 
     uint32_t src_ip_start, src_ip_end, src_port_start, src_port_end, dst_ip_start, dst_ip_end, dst_port_start, dst_port_end;
@@ -74,28 +74,28 @@ filter prepare_filter(std::string string_repr)
     
     
     if (tokens[4] == "ip"){
-        rv.protocol_start = 0;
-        rv.protocol_end = UINT32_MAX;
+        rv->protocol_start = 0;
+        rv->protocol_end = UINT32_MAX;
     }
     else{
-        rv.protocol_start = static_cast<uint8_t>(std::stoi(tokens[4]));
-        rv.protocol_end = rv.protocol_start;
+        rv->protocol_start = static_cast<uint8_t>(std::stoi(tokens[4]));
+        rv->protocol_end = rv->protocol_start;
     }
     
 
 
 
     
-    rv.src_ip_start = src_ip_start;
-    rv.src_ip_end = src_ip_end;
-    rv.src_port_start = src_port_start;
-    rv.src_port_end = src_port_end;
-    rv.dst_ip_start = dst_ip_start;
-    rv.dst_ip_end = dst_ip_end;
-    rv.dst_port_start = dst_port_start;
-    rv.dst_port_end = dst_port_end;
+    rv->src_ip_start = src_ip_start;
+    rv->src_ip_end = src_ip_end;
+    rv->src_port_start = src_port_start;
+    rv->src_port_end = src_port_end;
+    rv->dst_ip_start = dst_ip_start;
+    rv->dst_ip_end = dst_ip_end;
+    rv->dst_port_start = dst_port_start;
+    rv->dst_port_end = dst_port_end;
     
-    rv.fltr_= string_repr;
+    rv->fltr_= string_repr;
     
     return rv;
 }

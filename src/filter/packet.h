@@ -36,8 +36,11 @@
 
 
 
+#pragma pack(1)
 struct packet {
-    uint8_t  header[12];
+    uint8_t  header[9];
+    uint8_t proto;
+    uint8_t pad[2];
     uint32_t src_ip;
     uint32_t dst_ip;
     uint16_t src_port;
@@ -47,8 +50,9 @@ struct packet {
 
 
     std::vector<uint32_t> return_as_vector() {
-        std::vector<uint32_t> res = {header[9], src_ip, 
+        std::vector<uint32_t> res = {proto, src_ip, 
                                src_port, dst_ip, dst_port};
         return res;
     }
 };
+#pragma pack(0)

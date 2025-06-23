@@ -65,6 +65,9 @@ std::string trim(const std::string& str) {
 
 void sorted_insert(std::vector<std::pair<uint64_t, node *>> &ranges, const std::pair<uint64_t, node *> &new_pair)
 {
+    if (new_pair.first == 0){
+        std::cout << new_pair.first << std::endl;
+    }
     auto it = std::lower_bound(ranges.begin(), ranges.end(), new_pair,
                                [](const std::pair<uint64_t, node *> &a, const std::pair<uint64_t, node *> &b)
                                {
@@ -77,9 +80,6 @@ void sorted_insert(std::vector<std::pair<uint64_t, node *>> &ranges, const std::
 
 void sorted_insert_filter(std::vector<filter*>& vect, filter* flt)
 {
-    if (flt->fltr_ == ""){
-            std::cout <<"";
-    }
     auto it = std::lower_bound(vect.begin(), vect.end(), flt,
                                [](filter* a, filter* b)
                                {

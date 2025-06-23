@@ -36,4 +36,4 @@ struct filter {
     }
 };
 
-filter prepare_filter(std::string string_repr);
+filter* prepare_filter(std::string string_repr);

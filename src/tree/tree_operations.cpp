@@ -13,6 +13,7 @@ node *deep_copy_node(const node *source)
     }
 
     node *new_node = new node();
+    new_node->ranges.clear();
     new_node->is_terminal = source->is_terminal;
 
     new_node->ranges.reserve(source->ranges.size());

@@ -55,6 +55,7 @@ filter *prefix_tree::match(packet& packet)
     else if (current_node->is_terminal){
             return current_node->filters.at(0);
         }
+        return nullptr;
 }
 
 void prefix_tree::insert(filter *filter)
@@ -64,7 +65,7 @@ void prefix_tree::insert(filter *filter)
 
 void prefix_tree::insert_recursive(node *current_node, filter *filter, int num_of_range_in_filter)
 {
-
+    auto r = root;
     sorted_insert_filter(current_node->filters, filter);
 
 
@@ -77,6 +78,7 @@ void prefix_tree::insert_recursive(node *current_node, filter *filter, int num_o
     node *no_intersections_node = new node();
 
     int i = 0;
+
     while (i <= current_node->ranges.size())
     {
         if ( lb == current_node->ranges[i].first )
@@ -85,7 +87,6 @@ void prefix_tree::insert_recursive(node *current_node, filter *filter, int num_o
 
                 if (i+1 == current_node->ranges.size()){
                     current_node->ranges[i].second = no_intersections_node;
-                    auto a = ub+1;
                     sorted_insert(current_node->ranges, std::make_pair(ub + 1, nullptr));
 
                     if (no_intersections_node->filters.size() == 0) {
