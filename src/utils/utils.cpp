@@ -27,7 +27,7 @@ std::pair<uint32_t, uint32_t> get_ip_range(const std::string& ip_mask) {
     
 
     in_addr_t ip = inet_addr(ip_str.c_str());
-    ip = ntohl(ip); 
+    ip = ntohl(ip);
 
     uint32_t mask_bits = mask == 0 ? 0 : (~0U << (32 - mask));
     uint32_t ip_min = ip & mask_bits; 
@@ -80,6 +80,7 @@ void sorted_insert(std::vector<std::pair<uint64_t, node *>> &ranges, const std::
 
 void sorted_insert_filter(std::vector<filter*>& vect, filter* flt)
 {
+    
     auto it = std::lower_bound(vect.begin(), vect.end(), flt,
                                [](filter* a, filter* b)
                                {

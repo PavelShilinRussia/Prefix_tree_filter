@@ -97,21 +97,18 @@ void prefix_tree::insert_recursive(node *current_node, filter *filter, int num_o
                 i ++;
                 continue;
             }
-
+            node *deep_copied_node = deep_copy_node(current_node->ranges[i].second);
+            insert_recursive(deep_copied_node, filter, num_of_range_in_filter + 1);
+            current_node->ranges[i].second = deep_copied_node;
+            
             if (ub + 1 < current_node->ranges[i + 1].first) {
-                sorted_insert(current_node->ranges, std::make_pair(ub + 1, current_node->ranges[i].second));
-                node *deep_copied_node = deep_copy_node(current_node->ranges[i].second);
-                current_node->ranges[i].second = deep_copied_node;
-
-                insert_recursive(current_node->ranges[i].second, filter, num_of_range_in_filter + 1);
                 return;
             } else if (ub + 1 > current_node->ranges[i + 1].first) {
-                insert_recursive(current_node->ranges[i].second, filter, num_of_range_in_filter + 1);
+                
                 lb = current_node->ranges[i+1].first;
                 continue;
 
             } else if (ub + 1 == current_node->ranges[i + 1].first) {
-                insert_recursive(current_node->ranges[i].second, filter, num_of_range_in_filter + 1);
                 return;
             }
         }
@@ -160,6 +157,7 @@ void prefix_tree::insert_recursive(node *current_node, filter *filter, int num_o
             } else {
                 node *deep_copied_node = deep_copy_node(current_node->ranges[i-1].second);
                 sorted_insert(current_node->ranges, std::make_pair(lb, deep_copied_node));
+                i ++;
                 insert_recursive(deep_copied_node, filter, num_of_range_in_filter + 1);
 
                 if (ub + 1 < current_node->ranges[i].first) {

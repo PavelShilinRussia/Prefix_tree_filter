@@ -3,13 +3,9 @@
 #include "utils/utils.h"
 #include "prefix_tree.h"
 #include "tree_operations.h"
-
 #include <netinet/ip.h>
 
 int main() {
-    
-    // auto f2 = prepare_filter( "2 163 permit out 6 from 100.60.152.105/13 9158-22156 to 81.95.0.124/21 6772-30121");
-    // auto f3 = prepare_filter( "3 200 permit out 6 from 100.60.152.105/13 20738-30280 to 42.232.148.74/6 17079-50101");
     
     std::vector<filter*> filters = {};
     auto tree = prefix_tree();
@@ -21,6 +17,7 @@ int main() {
         std::cerr << "Не удалось открыть файлс фильтрами\n";
         return 1;
     }
+
 
     std::string line;
     while (std::getline(filt_file, line)) { 
@@ -42,15 +39,23 @@ int main() {
         return 1;
     }
 
+
+    int i = 0;
+    std::ofstream pac;   
+    pac.open("packets.txt");
+          
     while (pack_file.read(reinterpret_cast<char*>(&pack), 32)) {
-        pack.src_ip = ntohl(pack.src_ip);
-        pack.dst_ip = ntohl(pack.dst_ip);
-        pack.src_port = ntohs(pack.src_port);
-        pack.dst_port = ntohs(pack.dst_port);
+        pack.src_ip = pack.src_ip;
+        pack.dst_ip = pack.dst_ip;
+        pack.src_port = pack.src_port;
+        pack.dst_port = pack.dst_port;
         packets.push_back(pack);
+        pac << pack.proto << " " <<  pack.src_ip << " " << pack.src_port << " " << pack.dst_ip << " " << pack.dst_port << std::endl;
     }
 
     pack_file.close();
+    pac.close();
+    
 
     // uint8_t a = packets[12].header[9];
 
@@ -62,19 +67,26 @@ int main() {
     // packets.push_back(*a);
     // a->header[9] == 6;
     // auto b = a->return_as_vector();
+
+    std::ofstream out;         
+    out.open("out.txt");      
+    
+    
+
     size_t idx = 1;
     for (auto i : packets){
+
         filter* flt = tree.match(i);
         if (flt != nullptr){
-            std::cout << idx << " - " << flt->id_ << std::endl;
+            out << idx <<" "<< flt->id_ << std::endl;
         }
         else {
-            // std::cout << "no filter" << std::endl;
+            //std::cout << "no filter" << std::endl;
         }
         idx++;
     }
     
-    
+    out.close(); 
     return 0;
 }
 
