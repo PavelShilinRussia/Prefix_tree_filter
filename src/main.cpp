@@ -72,7 +72,7 @@ int main() {
     std::unique_ptr<result[]> results{new result[packets.size()]{}};
     size_t next_result_id = 0;
     
-    size_t idx = 1;
+    size_t idx = 0;
     for (auto i : packets){
         auto begin = ts();
         filter* flt = tree.match(i);
