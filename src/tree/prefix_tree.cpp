@@ -99,16 +99,19 @@ void prefix_tree::insert_recursive(node *current_node, filter *filter, int num_o
             }
             node *deep_copied_node = deep_copy_node(current_node->ranges[i].second);
             insert_recursive(deep_copied_node, filter, num_of_range_in_filter + 1);
-            current_node->ranges[i].second = deep_copied_node;
+            
             
             if (ub + 1 < current_node->ranges[i + 1].first) {
+                sorted_insert(current_node->ranges, std::make_pair(ub + 1, current_node->ranges[i].second));
+                current_node->ranges[i].second = deep_copied_node;
                 return;
             } else if (ub + 1 > current_node->ranges[i + 1].first) {
-                
+                current_node->ranges[i].second = deep_copied_node;
                 lb = current_node->ranges[i+1].first;
                 continue;
 
             } else if (ub + 1 == current_node->ranges[i + 1].first) {
+                current_node->ranges[i].second = deep_copied_node;
                 return;
             }
         }

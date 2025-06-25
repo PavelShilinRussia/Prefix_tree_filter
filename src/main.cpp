@@ -4,13 +4,20 @@
 #include "prefix_tree.h"
 #include "tree_operations.h"
 #include <netinet/ip.h>
+#include <chrono>
+#include <memory>
+
+struct result {
+    size_t record_idx;
+    unsigned int filter_idx;
+};
 
 int main() {
     
     std::vector<filter*> filters = {};
     auto tree = prefix_tree();
 
-    std::ifstream filt_file("/home/student-lab1/Desktop/Prefix_tree_filter/src/filters.txt");
+    std::ifstream filt_file("../src/filters.txt");
 
     
     if (!filt_file.is_open()) {
@@ -32,7 +39,7 @@ int main() {
     }
     packet pack;
     std::vector<packet> packets;
-    std::ifstream pack_file("/home/student-lab1/Desktop/Prefix_tree_filter/src/packets", std::ios::binary);
+    std::ifstream pack_file("../src/packets", std::ios::binary);
     
     if (!pack_file.is_open()) {
         std::cerr << "Не удалось открыть файл c пакетами\n";
@@ -56,35 +63,38 @@ int main() {
     pack_file.close();
     pac.close();
     
-
-    // uint8_t a = packets[12].header[9];
-
-    // packet* a = new packet;
-    // a->src_ip = ntohl(inet_addr("98.112.162.172"));
-    // a->dst_ip = ntohl(inet_addr("96.203.245.144"));
-    // a->src_port = 34934;
-    // a->dst_port = 13276;
-    // packets.push_back(*a);
-    // a->header[9] == 6;
-    // auto b = a->return_as_vector();
+    
 
     std::ofstream out;         
-    out.open("out.txt");      
+    size_t all = 0;
+    out.open("../result.txt");  
     
+    std::unique_ptr<result[]> results{new result[packets.size()]{}};
+    size_t next_result_id = 0;
     
-
     size_t idx = 1;
     for (auto i : packets){
-
+        auto begin = ts();
         filter* flt = tree.match(i);
         if (flt != nullptr){
-            out << idx <<" "<< flt->id_ << std::endl;
-        }
-        else {
-            //std::cout << "no filter" << std::endl;
+            results[next_result_id++] = {.record_idx = idx, .filter_idx = flt->id_};
         }
         idx++;
+        auto end = ts();
+  
+        auto elapsed_ms = end - begin;
+        all += elapsed_ms;
+        
     }
+
+    for (size_t i = 0; i < next_result_id; ++i) {
+        size_t const j = results[i].record_idx;
+        out << j <<" "<< (int) packets[j].proto << " " << int_to_ip(packets[j].src_ip) << " " << packets[j].src_port << " " << int_to_ip(packets[j].dst_ip) << " " << packets[j].dst_port << " matched filter " << results[i].filter_idx << std::endl;
+    }
+
+    std::cout << "Total time: " << all << " us" <<  std::endl;
+    std::cout << "Avarage match time: " << all/(double)idx << " us in " << idx << " matches" << std::endl;
+
     
     out.close(); 
     return 0;

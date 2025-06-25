@@ -103,29 +103,5 @@ filter* prepare_filter(std::string string_repr)
 std::pair<uint64_t, uint64_t> filter::get_range_i(int i) {
     
     return {raw[i*2], raw[i*2+1]};
-    /* 
-    if (i == 0){
-        return range(protocol_, protocol_);
-    }
-        
-    
-    else if ( 1 <= i && i <= 4 ){
-        
-        return range(src_ip_ranage_.first[i - 1], src_ip_ranage_.second[i - 1]);
-
-    }
-    
-    else if( i == 5 ){
-        range a = range(src_port_range_.first, src_port_range_.second);
-        return a;
-    }
-        
-    
-    else if (6 <= i && i <= 9){
-        return range(dst_ip_ranage_.first[i - 6], dst_ip_ranage_.second[i - 6]);
-    }
-    else if (i == 10){
-        return range(dst_port_range_.first, dst_port_range_.second);
-    } */
     
 }

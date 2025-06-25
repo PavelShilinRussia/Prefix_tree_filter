@@ -90,4 +90,19 @@ void sorted_insert_filter(std::vector<filter*>& vect, filter* flt)
     vect.insert(it, flt);
 }
 
+size_t ts()
+{
+    timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
 
+    size_t start_us = start.tv_sec + 1'000'000 + start.tv_nsec / 1'000;
+    return start_us;
+}
+
+
+std::string int_to_ip(unsigned int ip) {
+    return std::to_string((ip >> 24) & 255) + "." +
+           std::to_string((ip >> 16) & 255) + "." +
+           std::to_string((ip >> 8) & 255) + "." +
+           std::to_string(ip & 255);
+}
