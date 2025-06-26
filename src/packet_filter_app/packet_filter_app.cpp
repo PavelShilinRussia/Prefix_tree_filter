@@ -2,6 +2,7 @@
 #include <fstream>
 #include <chrono>
 #include <memory>
+#include <iostream>
 #include "utils/utils.h"
 
 struct result {
@@ -9,91 +10,81 @@ struct result {
     unsigned int filter_idx;
 };
 
-
-packet_filter_app::packet_filter_app(const std::string& filters_file_path)
-{
-
+packet_filter_app::packet_filter_app(const std::string& filters_file_path) {
     std::ifstream filt_file(filters_file_path);
 
     if (!filt_file.is_open()) {
-        std::cerr << "Не удалось открыть файлс фильтрами\n";
+        std::cerr << "Не удалось открыть файл с фильтрами\n";
+        return;
     }
+
     std::string line;
-    while (std::getline(filt_file, line)) { 
-        filter* f = prepare_filter(line);
-        if (not f) {
-            perror("error while preparing filters from string\n");
-        }          
+    while (std::getline(filt_file, line)) {
+        auto f = prepare_filter(line);
+        if (!f) {
+            std::cerr << "Ошибка при подготовке фильтра из строки\n";
+            continue;
+        }
         filters.push_back(f);
-        
-        tree.insert(filters[filters.size() - 1]);
+        tree.insert(filters.back());
     }
-
-
-
 }
 
-void packet_filter_app::filter_packets_file(const std::string& packets_file_path, const std::string& output_file_path)
-{
-
+void packet_filter_app::filter_packets_file(const std::string& packets_file_path, const std::string& output_file_path) {
     packet pack;
     std::vector<packet> packets;
     std::ifstream pack_file(packets_file_path, std::ios::binary);
-    
-    if (!pack_file.is_open()) {
-        std::cerr << "Не удалось открыть файл c пакетами\n";
 
+    if (!pack_file.is_open()) {
+        std::cerr << "Не удалось открыть файл с пакетами\n";
+        return;
     }
 
-
-    int i = 0;
-    std::ofstream pac;   
+    std::ofstream pac;
     pac.open("packets.txt");
-          
+
     while (pack_file.read(reinterpret_cast<char*>(&pack), 32)) {
         pack.src_ip = pack.src_ip;
         pack.dst_ip = pack.dst_ip;
         pack.src_port = pack.src_port;
         pack.dst_port = pack.dst_port;
         packets.push_back(pack);
-        pac << pack.proto << " " <<  pack.src_ip << " " << pack.src_port << " " << pack.dst_ip << " " << pack.dst_port << std::endl;
+        pac << static_cast<int>(pack.proto) << " " << pack.src_ip << " " << pack.src_port << " " 
+            << pack.dst_ip << " " << pack.dst_port << std::endl;
     }
 
     pack_file.close();
     pac.close();
-    
-    
 
-    std::ofstream out;         
+    std::ofstream out;
     size_t all = 0;
-    out.open("../result.txt");  
-    
-    std::unique_ptr<result[]> results{new result[packets.size()]{}};
+    out.open("../result.txt");
+
+    std::unique_ptr<result[]> results{new result[packets.size()]};
     size_t next_result_id = 0;
-    
+
     size_t idx = 0;
-    for (auto i : packets){
+    for (auto& packet : packets) {
         auto begin = ts();
-        filter* flt = tree.match(i);
-        if (flt != nullptr){
+        auto flt = tree.match(packet);
+        if (flt) {
             results[next_result_id++] = {.record_idx = idx, .filter_idx = flt->id_};
         }
         idx++;
         auto end = ts();
-  
         auto elapsed_ms = end - begin;
         all += elapsed_ms;
-        
     }
 
     for (size_t i = 0; i < next_result_id; ++i) {
         size_t const j = results[i].record_idx;
-        out << j <<" "<< (int) packets[j].proto << " " << int_to_ip(packets[j].src_ip) << " " << packets[j].src_port << " " << int_to_ip(packets[j].dst_ip) << " " << packets[j].dst_port << " matched filter " << results[i].filter_idx << std::endl;
+        out << j << " " << static_cast<int>(packets[j].proto) << " " << int_to_ip(packets[j].src_ip) << " " 
+            << packets[j].src_port << " " << int_to_ip(packets[j].dst_ip) << " " << packets[j].dst_port 
+            << " matched filter " << results[i].filter_idx << std::endl;
     }
 
-    std::cout << "Total time: " << all << " us" <<  std::endl;
-    std::cout << "Avarage match time: " << all/(double)idx << " us in " << idx << " matches" << std::endl;
+    std::cout << "Total time: " << all << " us" << std::endl;
+    std::cout << "Avarage match time: " << all / (double)idx << " us in " << idx << " matches" << std::endl;
 
-    
-    out.close(); 
+    out.close();
 }
