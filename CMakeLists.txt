@@ -15,6 +15,7 @@ add_executable(Prefix_tree_filter
     src/tree/prefix_tree.cpp
     src/tree/tree_operations.cpp
     src/tree/prefix_tree_node.cpp
+    src/packet_filter_app/packet_filter_app.cpp
 )
 
 target_include_directories(Prefix_tree_filter PUBLIC
@@ -22,4 +23,6 @@ target_include_directories(Prefix_tree_filter PUBLIC
     ${PROJECT_SOURCE_DIR}/src/filter
     ${PROJECT_SOURCE_DIR}/src/tree
     ${PROJECT_SOURCE_DIR}/src/utils
+    ${PROJECT_SOURCE_DIR}/src/packet_filter_app
 )
+
