@@ -15,9 +15,8 @@ struct result {
 
 int main() {
 
-    packet_filter_app app = packet_filter_app("/Users/pavelsilin/Desktop/Prefix_tree_filter/src/filters.txt");
-    app.filter_packets_file("/Users/pavelsilin/Desktop/Prefix_tree_filter/src/packets", "../results.txt");
+    packet_filter_app app = packet_filter_app("/home/student-lab1/Desktop/Prefix_tree_filter/src/filters.txt");
+    app.filter_packets_file("/home/student-lab1/Desktop/Prefix_tree_filter/src/packets", "../results.txt");
 
     return 0;
 }
-
