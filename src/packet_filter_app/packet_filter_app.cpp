@@ -18,9 +18,12 @@ packet_filter_app::packet_filter_app(const std::string& filters_file_path) {
         return;
     }
 
-    std::string line;
+    std::string line, first, sec, third;
     while (std::getline(filt_file, line)) {
-        auto f = prepare_filter(line);
+        std::stringstream ss(line);
+        ss >> first >> sec;
+        std::getline(ss, third);
+        auto f = prepare_filter(stoi(first), stoi(sec), third.substr(1));
         if (!f) {
             std::cerr << "Ошибка при подготовке фильтра из строки\n";
             continue;

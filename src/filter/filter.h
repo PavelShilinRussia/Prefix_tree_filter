@@ -3,7 +3,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
-
+#include <memory>
 struct filter {
     std::pair<uint64_t, uint64_t> get_range_i(int i) {
         return {raw[i*2], raw[i*2+1]};
@@ -34,4 +34,4 @@ struct filter {
     }
 };
 
-std::shared_ptr<filter> prepare_filter(const std::string& string_repr);
+std::shared_ptr<filter> prepare_filter(int id, int precedence, const std::string& string_repr);

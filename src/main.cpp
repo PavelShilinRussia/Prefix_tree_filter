@@ -7,7 +7,6 @@
 #include <chrono>
 #include <memory>
 #include "packet_filter_app/packet_filter_app.h"
-
 struct result {
     size_t record_idx;
     unsigned int filter_idx;
