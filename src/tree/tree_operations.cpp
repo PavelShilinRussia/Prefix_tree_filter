@@ -19,7 +19,7 @@ std::shared_ptr<node> deep_copy_node(const std::shared_ptr<node>& source) {
 
     new_node->filters.reserve(source->filters.size());
     for (const auto& f : source->filters) {
-        new_node->filters.push_back(f); // Копируем shared_ptr, увеличивая счётчик ссылок
+        new_node->filters.push_back(f);
     }
 
     return new_node;

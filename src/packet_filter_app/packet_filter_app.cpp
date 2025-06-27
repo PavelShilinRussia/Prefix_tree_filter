@@ -40,21 +40,15 @@ void packet_filter_app::filter_packets_file(const std::string& packets_file_path
         return;
     }
 
-    std::ofstream pac;
-    pac.open("packets.txt");
-
     while (pack_file.read(reinterpret_cast<char*>(&pack), 32)) {
         pack.src_ip = pack.src_ip;
         pack.dst_ip = pack.dst_ip;
         pack.src_port = pack.src_port;
         pack.dst_port = pack.dst_port;
         packets.push_back(pack);
-        pac << static_cast<int>(pack.proto) << " " << pack.src_ip << " " << pack.src_port << " " 
-            << pack.dst_ip << " " << pack.dst_port << std::endl;
     }
 
     pack_file.close();
-    pac.close();
 
     std::ofstream out;
     size_t all = 0;
