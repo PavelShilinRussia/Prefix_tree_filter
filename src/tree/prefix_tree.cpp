@@ -72,9 +72,8 @@ void prefix_tree::insert_recursive(std::shared_ptr<node> current_node, std::shar
                 i++;
                 continue;
             }
-            auto deep_copied_node = deep_copy_node(current_node->ranges[i].second);
+            auto deep_copied_node = selective_deep_copy_node(current_node->ranges[i].second, filter, num_of_range_in_filter + 1);
             insert_recursive(deep_copied_node, filter, num_of_range_in_filter + 1);
-
             if (ub + 1 < current_node->ranges[i + 1].first) {
                 sorted_insert(current_node->ranges, std::make_pair(ub + 1, current_node->ranges[i].second));
                 current_node->ranges[i].second = deep_copied_node;
@@ -121,7 +120,7 @@ void prefix_tree::insert_recursive(std::shared_ptr<node> current_node, std::shar
                     return;
                 }
             } else {
-                auto deep_copied_node = deep_copy_node(current_node->ranges[i - 1].second);
+                auto deep_copied_node = selective_deep_copy_node(current_node->ranges[i-1].second, filter, num_of_range_in_filter + 1);
                 sorted_insert(current_node->ranges, std::make_pair(lb, deep_copied_node));
                 i++;
                 insert_recursive(deep_copied_node, filter, num_of_range_in_filter + 1);
