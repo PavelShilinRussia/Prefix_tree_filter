@@ -2,6 +2,13 @@
 #include "utils/utils.h"
 #include <algorithm>
 #include "tree_operations.h"
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <fstream>
+#include <iostream>
+
 prefix_tree::prefix_tree() {
     root = std::make_shared<node>();
 }
@@ -19,11 +26,7 @@ std::shared_ptr<filter> prefix_tree::match(packet& packet) {
             return current_node->filters.at(0);
         }
 
-        auto it = std::lower_bound(current_node->ranges.begin(), current_node->ranges.end(), i,
-            [](const std::pair<uint64_t, std::shared_ptr<node>>& a, int b) {
-                return a.first < b;
-            });
-
+        auto it = current_node->ranges.lower_bound(i);
         if (it == current_node->ranges.end() || it->first > i) {
             if (it == current_node->ranges.begin()) {
                 return nullptr;
@@ -55,86 +58,77 @@ void prefix_tree::insert_recursive(std::shared_ptr<node> current_node, std::shar
     }
 
     auto [lb, ub] = filter->get_range_i(num_of_range_in_filter);
+    if (ub+1 == 0){
+        ub --;
+    }
+
     auto no_intersections_node = std::make_shared<node>();
 
-    size_t i = 0;
-    while (i < current_node->ranges.size()) {
-        if (lb == current_node->ranges[i].first) {
-            if (!current_node->ranges[i].second) {
-                if (i + 1 == current_node->ranges.size()) {
-                    current_node->ranges[i].second = no_intersections_node;
-                    sorted_insert(current_node->ranges, std::make_pair(ub + 1, nullptr));
-                    if (no_intersections_node->filters.empty()) {
-                        insert_recursive(no_intersections_node, filter, num_of_range_in_filter + 1);
-                    }
-                    return;
+    auto it = current_node->ranges.lower_bound(lb);
+    while (it != current_node->ranges.end()) {
+        if (lb == it->first) {
+            if (!it->second) {
+                it->second = no_intersections_node;
+                if (no_intersections_node->filters.empty()) {
+                    insert_recursive(no_intersections_node, filter, num_of_range_in_filter + 1);
                 }
-                i++;
-                continue;
+                auto next_it = std::next(it);
+                if (next_it == current_node->ranges.end() || ub + 1 < next_it->first) {
+                    current_node->ranges[ub + 1] = nullptr;
+                }
+                return;
             }
-            auto deep_copied_node = deep_copy_node(current_node->ranges[i].second);
+            auto deep_copied_node = selective_deep_copy_node(it->second, filter, num_of_range_in_filter + 1);
             insert_recursive(deep_copied_node, filter, num_of_range_in_filter + 1);
-
-            if (ub + 1 < current_node->ranges[i + 1].first) {
-                sorted_insert(current_node->ranges, std::make_pair(ub + 1, current_node->ranges[i].second));
-                current_node->ranges[i].second = deep_copied_node;
+            auto next_it = std::next(it);
+            if (next_it == current_node->ranges.end() || ub + 1 < next_it->first) {
+                current_node->ranges[ub + 1] = it->second;
+                it->second = deep_copied_node;
                 return;
-            } else if (ub + 1 > current_node->ranges[i + 1].first) {
-                current_node->ranges[i].second = deep_copied_node;
-                lb = current_node->ranges[i + 1].first;
+            } else if (ub + 1 == next_it->first) {
+                it->second = deep_copied_node;
+                return;
+            } else {
+                it->second = deep_copied_node;
+                lb = next_it->first;
+                it = next_it;
                 continue;
-            } else if (ub + 1 == current_node->ranges[i + 1].first) {
-                current_node->ranges[i].second = deep_copied_node;
-                return;
             }
-        } else if (lb > current_node->ranges[i].first) {
-            if (i + 1 == current_node->ranges.size()) {
-                if (lb > current_node->ranges[i].first) {
-                    sorted_insert(current_node->ranges, std::make_pair(lb, no_intersections_node));
-                } else if (lb == current_node->ranges[i].first) {
-                    current_node->ranges[i - 1].second = no_intersections_node;
-                }
+        } else if (lb < it->first) {
+            auto prev_it = it == current_node->ranges.begin() ? current_node->ranges.end() : std::prev(it);
+            if (prev_it == current_node->ranges.end() || !prev_it->second) {
+                current_node->ranges[lb] = no_intersections_node;
                 if (no_intersections_node->filters.empty()) {
                     insert_recursive(no_intersections_node, filter, num_of_range_in_filter + 1);
                 }
-                sorted_insert(current_node->ranges, std::make_pair(ub + 1, nullptr));
-                i++;
-                return;
-            }
-            i++;
-            continue;
-        } else if (lb < current_node->ranges[i].first) {
-            if (!current_node->ranges[i - 1].second) {
-                if (lb == current_node->ranges[i - 1].first) {
-                    current_node->ranges[i - 1].second = no_intersections_node;
-                } else {
-                    sorted_insert(current_node->ranges, std::make_pair(lb, no_intersections_node));
-                    i++;
-                }
-                if (no_intersections_node->filters.empty()) {
-                    insert_recursive(no_intersections_node, filter, num_of_range_in_filter + 1);
-                }
-                if (ub + 1 < current_node->ranges[i].first) {
-                    sorted_insert(current_node->ranges, std::make_pair(ub + 1, nullptr));
+                if (it == current_node->ranges.end() || ub + 1 < it->first) {
+                    current_node->ranges[ub + 1] = nullptr;
                     return;
-                } else if (ub + 1 == current_node->ranges[i].first) {
+                } else if (ub + 1 == it->first) {
                     return;
                 }
             } else {
-                auto deep_copied_node = deep_copy_node(current_node->ranges[i - 1].second);
-                sorted_insert(current_node->ranges, std::make_pair(lb, deep_copied_node));
-                i++;
+                auto deep_copied_node = selective_deep_copy_node(prev_it->second, filter, num_of_range_in_filter + 1);
+                current_node->ranges[lb] = deep_copied_node;
                 insert_recursive(deep_copied_node, filter, num_of_range_in_filter + 1);
-                if (ub + 1 < current_node->ranges[i].first) {
-                    sorted_insert(current_node->ranges, std::make_pair(ub + 1, current_node->ranges[i - 2].second));
+                if (it == current_node->ranges.end() || ub + 1 < it->first) {
+                    current_node->ranges[ub + 1] = prev_it->second;
                     return;
-                } else if (ub + 1 == current_node->ranges[i].first) {
+                } else if (ub + 1 == it->first) {
                     return;
                 }
             }
-            lb = current_node->ranges[i].first;
-            continue;
+            break;
         }
-        i++;
+        ++it;
     }
+
+    auto prev_it = std::prev(current_node->ranges.end());
+    current_node->ranges[lb] = no_intersections_node;
+    if (no_intersections_node->filters.empty()) {
+        insert_recursive(no_intersections_node, filter, num_of_range_in_filter + 1);
+    }
+    current_node->ranges[ub + 1] = nullptr;
 }
+
+

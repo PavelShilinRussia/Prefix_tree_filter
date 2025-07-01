@@ -55,27 +55,30 @@ void packet_filter_app::filter_packets_file(const std::string& packets_file_path
 
     std::ofstream out;
     size_t all = 0;
-    out.open("../result.txt");
+    out.open(output_file_path);
 
     std::unique_ptr<result[]> results{new result[packets.size()]};
     size_t next_result_id = 0;
 
     size_t idx = 0;
+    auto begin = ts();
     for (auto& packet : packets) {
-        auto begin = ts();
+        
         auto flt = tree.match(packet);
         if (flt) {
             results[next_result_id++] = {.record_idx = idx, .filter_idx = flt->id_};
         }
         idx++;
-        auto end = ts();
-        auto elapsed_ms = end - begin;
-        all += elapsed_ms;
     }
+
+    auto end = ts();
+    auto elapsed_ms = end - begin;
+    all = elapsed_ms;
+
 
     for (size_t i = 0; i < next_result_id; ++i) {
         size_t const j = results[i].record_idx;
-        out << j << " " << static_cast<int>(packets[j].proto) << " " << int_to_ip(packets[j].src_ip) << " " 
+        out << j + 1 << " " << static_cast<int>(packets[j].proto) << " " << int_to_ip(packets[j].src_ip) << " " 
             << packets[j].src_port << " " << int_to_ip(packets[j].dst_ip) << " " << packets[j].dst_port 
             << " matched filter " << results[i].filter_idx << std::endl;
     }

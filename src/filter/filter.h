@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 struct filter {
-    std::pair<uint64_t, uint64_t> get_range_i(int i) {
+    std::pair<uint32_t, uint32_t> get_range_i(int i) {
         return {raw[i*2], raw[i*2+1]};
     }
 
